@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Unity Game Library</title>
+	<link rel="shortcut icon" href="TemplateData/favicon.ico">
+	<link rel="stylesheet" href="TemplateData/style.css">
+	<script></script>
+	<style>
+		.gameContainer {
+			width: 960px;
+			height: 600px;
+			margin: 150px 0;
+			margin-left: calc(50% - (960px/2));
+		}
+
+		.startGameButton {
+			width: 960px;
+			height: 600px;
+			background-color: rgba(255, 255, 255, .7);
+			position: absolute;
+			z-index: 10;
+			border-width: 0;
+		}
+
+		.startGameButton div {
+			width: 33%;
+			margin-left: 33%;
+			margin-top: 300px;
+			font: bold 15px Arial, sans-serif;
+			background: #231F20;
+			border-radius: 5px;
+			text-align: center;
+			padding: 10px 0;
+			color: white;
+		}
+	</style>
+</head>
+
+<body>
+	<!-- <div id="game0" class="gameContainer">
+		<div class="startGameButton">
+			<div>Click Me!</div>
+		</div>
+		<div class="unity-container" class="unity-desktop">
+			<canvas class="unity-canvas" width=960 height=600></canvas>
+			<div class="unity-loading-bar">
+				<div class="unity-logo"></div>
+				<div class="unity-progress-bar-empty">
+					<div class="unity-progress-bar-full"></div>
+				</div>
+			</div>
+			<div class="unity-mobile-warning">
+				WebGL builds are not supported on mobile devices.
+			</div>
+			<div class="unity-footer">
+				<div class="unity-webgl-logo"></div>
+				<div class="unity-fullscreen-button"></div>
+				<div class="unity-build-title">BouncingPoby_v01</div>
+			</div>
+		</div>
+	</div> -->
+
+	<script>
+
+		// Template Data folder and index.html(unity's creation) will be deleted
+		// Build files path MUST be like : Example_Game_Name_v03/Build
+		// and files inside "Build" folder MUST be exactly same name as game
+		// Only add the Game Name here
+		var gameNames = [
+			"WebGL-Game02"
+		]
+
+
+		// CreatingGame areas
+		for (let index = 0; index < gameNames.length; index++) {
+			const element = gameNames[index];
+
+			document.write('	<div id=\"game' + index + '\" class=\"gameContainer\">\n');
+			document.write('		<button onclick=\"loadGame(' + index + ')\" class=\"startGameButton\">\n');
+			document.write('			<div>Click Me!</div>\n');
+			document.write('		</button>\n');
+			document.write('		<div class=\"unity-container\" class=\"unity-desktop\">\n');
+			document.write('			<canvas class=\"unity-canvas\" width=960 height=600></canvas>\n');
+			document.write('			<div class=\"unity-loading-bar\">\n');
+			document.write('				<div class=\"unity-logo\"></div>\n');
+			document.write('				<div class=\"unity-progress-bar-empty\">\n');
+			document.write('					<div class=\"unity-progress-bar-full\"></div>\n');
+			document.write('				</div>\n');
+			document.write('			</div>\n');
+			document.write('			<div class=\"unity-mobile-warning\">\n');
+			document.write('				WebGL builds are not supported on mobile devices.\n');
+			document.write('			</div>\n');
+			document.write('			<div class=\"unity-footer\">\n');
+			document.write('				<div class=\"unity-webgl-logo\"></div>\n');
+			document.write('				<div class=\"unity-fullscreen-button\"></div>\n');
+			document.write('				<div class=\"unity-build-title\">' + element + '</div>\n');
+			document.write('			</div>\n');
+			document.write('		</div>\n');
+			document.write('	</div>');
+		}
+
+
+
+
+		// Loading Game
+
+
+		function loadGame(index) {
+
+			const element = gameNames[index];
+
+			var buildUrl = element + "/Build";
+			var loaderUrl = buildUrl + "/" + element + ".loader.js";
+			var config = {
+				dataUrl: buildUrl + "/" + element + ".data",
+				frameworkUrl: buildUrl + "/" + element + ".framework.js",
+				codeUrl: buildUrl + "/" + element + ".wasm",
+				streamingAssetsUrl: "StreamingAssets",
+				companyName: "DefaultCompany",
+				productName: element,
+				productVersion: "0.1",
+			};
+
+			var loaderParent = document.querySelector("#game" + index);
+
+			var container = loaderParent.querySelectorAll(".unity-container")[0];
+			var canvas = loaderParent.querySelectorAll(".unity-canvas")[0];
+			var loadingBar = loaderParent.querySelectorAll(".unity-loading-bar")[0];
+			var progressBarFull = loaderParent.querySelectorAll(".unity-progress-bar-full")[0];
+			var fullscreenButton = loaderParent.querySelectorAll(".unity-fullscreen-button")[0];
+			var mobileWarning = loaderParent.querySelectorAll(".unity-mobile-warning")[0];
+			var gameStartButton = loaderParent.querySelectorAll(".startGameButton")[0];
+			gameStartButton.style.display = "none";
+
+			// By default Unity keeps WebGL canvas render target size matched with
+			// the DOM size of the canvas element (scaled by window.devicePixelRatio)
+			// Set this to false if you want to decouple this synchronization from
+			// happening inside the engine, and you would instead like to size up
+			// the canvas DOM size and WebGL render target sizes yourself.
+			// config.matchWebGLToCanvasSize = false;
+
+			if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+				container.className = "unity-mobile";
+				// Avoid draining fillrate performance on mobile devices,
+				// and default/override low DPI mode on mobile browsers.
+				config.devicePixelRatio = 1;
+				mobileWarning.style.display = "block";
+				setTimeout(() => {
+					mobileWarning.style.display = "none";
+				}, 5000);
+			} else {
+				canvas.style.width = "960px";
+				canvas.style.height = "600px";
+			}
+			loadingBar.style.display = "block";
+
+
+			var script = document.createElement("script");
+			script.src = loaderUrl;
+			script.onload = () => {
+				createUnityInstance(canvas, config, (progress) => {
+					progressBarFull.style.width = 100 * progress + "%";
+				}).then((unityInstance) => {
+					loadingBar.style.display = "none";
+					fullscreenButton.onclick = () => {
+						unityInstance.SetFullscreen(1);
+					};
+				}).catch((message) => {
+					alert(message);
+				});
+			};
+			document.body.appendChild(script);
+		};
+
+
+
+
+
+
+
+
+	</script>
+</body>
+
+</html>
