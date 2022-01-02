@@ -1,1 +1,1 @@
-https://yagizayer.github.io/BAP_AllGames_Playable/
+https://mskuegitseloyunlar.github.io/BAP_AllGames_Playable/
